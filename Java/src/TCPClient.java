@@ -16,15 +16,16 @@ public class TCPClient {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
             String inputLine;
-            while ((inputLine = userInput.readLine()) != null) {
+            System.out.println("Enter message (type 'exit' to quit): ");
+            while ((inputLine = userInput.readLine()) != null && !inputLine.equalsIgnoreCase("exit")) {
                 out.println(inputLine);
-                System.out.println("Enter message: ");
                 System.out.println("Server: " + in.readLine());
+                System.out.println("Enter message (type 'exit' to quit): ");
             }
 
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
-}
-}
+        }
+    }
 }

@@ -26,6 +26,6 @@ public class TCPServer {
             serverSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
-}
-}
+        }
+    }
 }
