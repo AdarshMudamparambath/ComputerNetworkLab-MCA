@@ -1,43 +1,50 @@
+// Server code
 import java.io.*;
 import java.net.*;
 
-class Q3Server {
-    public static void main(String args[]) {
-        try {
-            // Create server Socket
-            ServerSocket ss = new ServerSocket(888);
-            System.out.println("Server started, waiting for clients...");
+public class Q3Server {
+    public static void main(String[] args) {
+        int serverPort = 9876;
 
-            // Connect to client socket
-            Socket s = ss.accept();
-            System.out.println("Connection established with client: " + s.getInetAddress());
+        // Start the server and listen for connections
+        try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
+            System.out.println("Server started. Waiting for client...");
 
-            // To send data to the client
-            PrintStream ps = new PrintStream(s.getOutputStream());
+            // Accept client connection
+            try (Socket clientSocket = serverSocket.accept();
+                 BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                 PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
-            // To read data coming from the client
-            BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                System.out.println("Client connected: " + clientSocket.getInetAddress().getHostAddress());
 
-            // To read data from the keyboard
-            BufferedReader kb = new BufferedReader(new InputStreamReader(System.in));
+                // Communication loop
+                String clientMessage;
+                while ((clientMessage = input.readLine()) != null) {
+                    System.out.println("Message received from client: " + clientMessage);
 
-            // Server executes continuously
-            String str;
-            while ((str = br.readLine()) != null) {
-                System.out.println("Client: " + str);
-                System.out.print("Server: ");
-                String response = kb.readLine();
-                ps.println(response);
+                    // Input message from server
+                    System.out.print("Enter message for client: ");
+                    BufferedReader serverInput = new BufferedReader(new InputStreamReader(System.in));
+                    String serverMessage = serverInput.readLine();
+
+                    // Send message to client
+                    output.println(serverMessage);
+
+                    // Check if server wants to exit
+                    if (serverMessage.equals("exit")) {
+                        break;
+                    }
+
+                    // Receive acknowledgment from client (not needed in TCP)
+                    // Output is already synchronized with the client
+                }
+
+            } catch (IOException e) {
+                System.err.println("Error in client communication: " + e.getMessage());
             }
 
-            // Close connection
-            ps.close();
-            br.close();
-            kb.close();
-            ss.close();
-            s.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("Error in server socket: " + e.getMessage());
         }
     }
 }

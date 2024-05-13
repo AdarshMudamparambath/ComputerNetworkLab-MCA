@@ -1,26 +1,28 @@
-import java.io.*; 
-import java.net.*; //package for ServerSocket class 
-import java.util.Scanner; 
-public class Q1Server{ 
- public static void main(String[] args) throws IOException { 
- try { 
- while (true) { 
- ServerSocket ss = new ServerSocket(4111); //Object creation 
- Socket s = ss.accept(); //connection is made 
- System.out.println("Connection done\n"); 
- PrintStream ps = new PrintStream(s.getOutputStream()); //To sent message to the client 
- Scanner sc=new Scanner(System.in); 
- System.out.println("Enter your message to client\n"); 
- String str=sc.nextLine(); 
- ps.print(str); 
- ps.flush(); 
- ss.close(); 
- s.close(); 
- } 
- } 
- catch(Exception e) 
- { 
- System.out.println(e); 
- } 
- } 
-} 
+import java.io.*;
+import java.net.*;
+
+public class Q1Server {
+
+    public static void main(String[] args) throws IOException {
+        // Choose a port number (replace with a valid port if needed)
+        int port = 8080;
+
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Server started on port " + port);
+
+            // Wait for a client connection
+            Socket clientSocket = serverSocket.accept();
+
+            System.out.println("Client connected!");
+
+            // Read the message sent from the client
+            DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());
+            String message = inputStream.readUTF();
+
+            System.out.println("Received message: " + message);
+
+            // Close resources
+            clientSocket.close();
+        }
+    }
+}
