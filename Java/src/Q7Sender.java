@@ -1,67 +1,33 @@
-import java.io.*;
-import java.net.*;
 import java.util.Random;
 
-public class Q7Sender {
-    private DatagramSocket socket;
-    private InetAddress address;
-    private int port;
-
-    public Q7Sender(String address, int port) throws IOException {
-        this.socket = new DatagramSocket();
-        this.address = InetAddress.getByName(address);
-        this.port = port;
-    }
-
-    public void sendData() {
-        Random random = new Random();
-        while (true) {
-            try {
-                // Generate random data
-                String data = generateData();
-                int checksum = calculateChecksum(data);
-
-                // Prepare the message with data and checksum
-                String message = data + ":" + checksum;
-
-                // Send the message
-                byte[] buffer = message.getBytes();
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, port);
-                socket.send(packet);
-                System.out.println("Sent: " + message);
-
-                // Simulate a delay
-                Thread.sleep(1000);
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private String generateData() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < 5; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
-        }
-        return sb.toString();
-    }
-
-    private int calculateChecksum(String data) {
-        int checksum = 0;
-        for (char c : data.toCharArray()) {
-            checksum += c;
-        }
-        return checksum;
-    }
+class SimplexSender {
+    private static final int FRAME_SIZE = 4; // Size of each frame
+    private static final int NOISE_PROBABILITY = 30; // Probability of noise (%)
 
     public static void main(String[] args) {
-        try {
-            Q7Sender sender = new Q7Sender("localhost", 9876);
-            sender.sendData();
-        } catch (IOException e) {
-            e.printStackTrace();
+        String dataToSend = "Hello, world!";
+        System.out.println("Sending data: " + dataToSend);
+        sendFrames(dataToSend);
+    }
+
+    private static void sendFrames(String data) {
+        for (int i = 0; i < data.length(); i += FRAME_SIZE) {
+            String frame = data.substring(i, Math.min(i + FRAME_SIZE, data.length()));
+            System.out.println("Sending frame: " + frame);
+            String transmittedFrame = introduceNoise(frame);
+            SimplexReceiver.receiveFrame(transmittedFrame);
         }
     }
+
+    private static String introduceNoise(String frame) {
+        Random rand = new Random();
+        if (rand.nextInt(100) < NOISE_PROBABILITY) {
+            // Simulate noise by corrupting the frame
+            char[] frameArray = frame.toCharArray();
+            int randomIndex = rand.nextInt(frame.length());
+            frameArray[randomIndex] = (char) (rand.nextInt(26) + 'a'); // Randomly change a character
+            return new String(frameArray);
+        }
+        return frame;
+}
 }
